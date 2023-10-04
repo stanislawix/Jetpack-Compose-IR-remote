@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Pilot na podczerwień</string>
+    <string name="fan_header">Pilot do wentylatora\nMPM MWP-19</string>
+    <string name="fan_off">WYŁĄCZ</string>
+    <string name="fan_on_speed">WŁĄCZ / PRĘDKOŚĆ</string>
+    <string name="fan_mode">TRYB</string>
+    <string name="fan_timer">OPÓŹNIONE WYŁĄCZENIE</string>
+    <string name="fan_swing">PRZEŁĄCZ OBRÓT</string>
+</resources>

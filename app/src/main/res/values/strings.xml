@@ -1,0 +1,9 @@
+<resources>
+    <string name="app_name">Compose IR remote</string>
+    <string name="fan_header">IR remote for the\nMPM MWP-19 fan</string>
+    <string name="fan_off">OFF</string>
+    <string name="fan_on_speed">ON / SPEED</string>
+    <string name="fan_mode">MODE</string>
+    <string name="fan_timer">TIMER</string>
+    <string name="fan_swing">SWING</string>
+</resources>

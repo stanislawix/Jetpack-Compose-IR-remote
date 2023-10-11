@@ -10,9 +10,11 @@ Thanks to the code from ZoserLock's repository, messages using NEC and Sony SIRC
 
 I have added support for the JVC infrared protocol, based on the mentioned ZoserLock's code and with the help of the incredibly well-documented [Arduino-IRremote](https://github.com/Arduino-IRremote/Arduino-IRremote)'s code.
 
+The fan's photo is taken from [this](https://mpm.pl/pl/wentylatory/289-wentylator-stojacy-mwp-19-5903151001290.html) MPM AGD (fan producer's) site.
+
 # Features
 - GUI for remote control of the MPM MWP-19 room fan,
 - built-in support for NEC, SIRC and JVC infrared protocols - the code can be changed in order to control a device other than the fan.
 
 # Screenshots
-
+![Fan remote screenshot](https://raw.githubusercontent.com/stanislawix/Jetpack-Compose-IR-remote/master/images/screenshot1.png)

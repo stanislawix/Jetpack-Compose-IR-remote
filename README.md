@@ -17,4 +17,4 @@ The fan's photo is taken from [this](https://mpm.pl/pl/wentylatory/289-wentylato
 - built-in support for NEC, SIRC and JVC infrared protocols - the code can be changed in order to control a device other than the fan.
 
 # Screenshots
-![Fan remote screenshot](https://raw.githubusercontent.com/stanislawix/Jetpack-Compose-IR-remote/master/images/screenshot1.png)
+![Fan remote screenshot](https://raw.githubusercontent.com/stanislawix/Jetpack-Compose-IR-remote/master/images/screenshot1.jpg)

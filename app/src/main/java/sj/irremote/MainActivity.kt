@@ -35,7 +35,19 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import sj.irremote.infrared.highlevel.EnumCommand
+import sj.irremote.infrared.highlevel.HexCommand
+import sj.irremote.infrared.highlevel.IrAddress
+import sj.irremote.infrared.highlevel.JvcCommand
+import sj.irremote.infrared.highlevel.MpmCommand
+import sj.irremote.infrared.lowlevel.IRJvcFactory
+import sj.irremote.infrared.lowlevel.IRMessage
+import sj.irremote.infrared.lowlevel.IRNecFactory
 import sj.irremote.ui.theme.ComposeIRRemoteTheme
+
+/**
+ * This is a mobile app that uses the ConsumerIrManager API to send IR commands to a fan. More handy than a real remote - you almost always have your phone on you.
+ */
 
 class MainActivity : ComponentActivity() {
 
@@ -43,6 +55,8 @@ class MainActivity : ComponentActivity() {
     private var vibrator: Vibrator? = null
     private var vibratorManager: VibratorManager? = null
 
+    val mpmAddress = IrAddress(hexAddress = 0x0, reverseAddressBits = false)
+    val jvcAddress = IrAddress(hexAddress = 0xA3, reverseAddressBits = true)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -81,56 +95,56 @@ class MainActivity : ComponentActivity() {
     }
 
     private fun sendIrCommand(enumCommand: EnumCommand) {
-        Log.d("Compose IR remote app", "Sending command: $enumCommand")
-        val commandHexInt: String
-        val commandInt: Int
-        val commandBinary: String
-        val commandHex: Long
-        val commandEz: Int
+        val irCommand: IRMessage
 
         when (enumCommand) {
             EnumCommand.OFF -> {
-                commandHexInt = "46"
-                commandInt = -1186529536
-                commandBinary = "10111001010001101111111100000000"
-                commandHex = 0xB946FF00L
-                commandEz = 98
+//                irCommand = getIrCommand(JvcCommand.ON_OFF)
+                irCommand = getIrCommand(MpmCommand.OFF)
             }
 
             EnumCommand.ON_SPEED -> {
-                commandHexInt = "44"
-                commandInt = -1153106176
-                commandBinary = "10111011010001001111111100000000"
-                commandHex = 0xBB44FF00L
-                commandEz = 34
+//                irCommand = getIrCommand(JvcCommand.VOLUME_UP)
+                irCommand = getIrCommand(MpmCommand.ON_SPEED)
             }
 
             EnumCommand.MODE -> {
-                commandHexInt = "15"
-                commandInt = -367657216
-                commandBinary = "11101010000101011111111100000000"
-                commandHex = 0xEA15FF00L
-                commandEz = 168
+//                irCommand = getIrCommand(JvcCommand.VOLUME_DOWN)
+                irCommand = getIrCommand(MpmCommand.MODE)
             }
 
             EnumCommand.TIMER -> {
-                commandHexInt = "16"
-                commandInt = -384368896
-                commandBinary = "11101001000101101111111100000000"
-                commandHex = 0xE916FF00L
-                commandEz = 104
+//                irCommand = getIrCommand(JvcCommand.NUMBER_10)
+                irCommand = getIrCommand(MpmCommand.TIMER)
             }
 
             EnumCommand.SWING -> {
-                commandHexInt = "8"
-                commandInt = -150405376
-                commandBinary = "11110111000010001111111100000000"
-                commandHex = 0xF708FF00L
-                commandEz = 16
+//                irCommand = getIrCommand(JvcCommand.NUMBER_10_PLUS)
+                irCommand = getIrCommand(MpmCommand.SWING)
             }
         }
 
-        val necCommand = IRNecFactory.create(commandEz, 0x0, 0)
+        Log.d("Compose IR remote app", "Sending command: $enumCommand")
+        sendIrCommand(irCommand)
+
+    }
+
+    private fun bruteforceTransmitCommand(
+        commandRangeStart: Int = 0,
+        commandRangeEnd: Int = 255,
+        address: IrAddress = IrAddress(0x0, true),
+        sleepBetweenCommands: Int = 150
+    ) {
+        val addr = address.toInt()
+        for (cmd in commandRangeStart..commandRangeEnd) {
+            val irMessage = IRJvcFactory.create(cmd, addr, 3)
+            irManager?.transmit(irMessage.frequency, irMessage.message)
+            Log.d("Compose IR remote app", "Sending command: $cmd")
+            Thread.sleep(sleepBetweenCommands.toLong())
+        }
+    }
+
+    private fun sendIrCommand(irMessage: IRMessage) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             vibratorManager?.vibrate(
                 CombinedVibration.createParallel(
@@ -140,9 +154,33 @@ class MainActivity : ComponentActivity() {
         } else {
             vibrator?.vibrate(100)
         }
-        irManager?.transmit(necCommand.frequency, necCommand.message)
-
+        irManager?.transmit(irMessage.frequency, irMessage.message)
     }
+
+    private fun getIrCommand(cmd: HexCommand): IRMessage {
+        val hexCommand = cmd.toInt()
+        val hexAddress: Int
+        val irCommand: IRMessage
+        when (cmd) {
+            is MpmCommand -> {
+                hexAddress = mpmAddress.toInt()
+                irCommand = IRNecFactory.create(hexCommand, hexAddress, 0)
+            }
+
+            is JvcCommand -> {
+                hexAddress = jvcAddress.toInt()
+                irCommand = IRJvcFactory.create(hexCommand, hexAddress, 3)
+            }
+
+            else -> throw IllegalArgumentException("Unknown command type!")
+        }
+        Log.d(
+            "Compose IR remote app",
+            "Preparing IR ${cmd.javaClass.simpleName}: ${cmd.getEnumName()} code=${cmd.toInt()} (proper: $hexCommand), address = $hexAddress (proper: $hexAddress)"
+        )
+        return irCommand
+    }
+
 
 }
 
@@ -154,7 +192,6 @@ class MainActivity : ComponentActivity() {
 @Composable
 private fun MainContent(onCommandSend: (EnumCommand) -> Unit = { }) {
     ComposeIRRemoteTheme {
-        // A surface container using the 'background' color from the theme
         Surface(
             modifier = Modifier.fillMaxSize(),
             color = MaterialTheme.colorScheme.background
@@ -169,7 +206,6 @@ private fun MainContent(onCommandSend: (EnumCommand) -> Unit = { }) {
                         .size(200.dp, 300.dp)
                         .fillMaxSize()
                 )
-//                FanImage()
                 Remote(onCommandSend = onCommandSend)
             }
         }
@@ -193,7 +229,7 @@ fun Header(modifier: Modifier = Modifier) {
 fun FanImage(modifier: Modifier = Modifier) {
     Image(
         painter = painterResource(id = R.drawable.fan_photo),
-        contentDescription = "MPM fan photo",
+        contentDescription = "MPM MWP-19 fan photo",
         modifier = modifier
     )
     Spacer(modifier = Modifier.height(24.dp))

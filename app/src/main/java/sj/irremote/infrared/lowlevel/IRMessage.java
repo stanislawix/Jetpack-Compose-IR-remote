@@ -1,4 +1,4 @@
-package sj.irremote;
+package sj.irremote.infrared.lowlevel;
 
 public class IRMessage {
     public static int FREQ_37_KHZ = 37000;

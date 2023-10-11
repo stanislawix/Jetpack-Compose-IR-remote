@@ -1,4 +1,4 @@
-package sj.irremote
+package sj.irremote.infrared.highlevel
 
 enum class EnumCommand {
     OFF,

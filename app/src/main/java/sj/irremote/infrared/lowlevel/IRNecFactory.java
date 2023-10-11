@@ -1,4 +1,4 @@
-package sj.irremote;
+package sj.irremote.infrared.lowlevel;
 
 import java.util.ArrayList;
 import java.util.List;

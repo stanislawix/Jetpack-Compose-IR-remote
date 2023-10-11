@@ -1,4 +1,4 @@
-package sj.irremote;
+package sj.irremote.infrared.lowlevel;
 
 import android.content.Context;
 import android.hardware.ConsumerIrManager;
